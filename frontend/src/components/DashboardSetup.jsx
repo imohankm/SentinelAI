@@ -1,10 +1,13 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 export default function DashboardSetup() {
   const navigate = useNavigate();
+  const [target, setTarget] = useState('corp_lab');
 
   const handleInit = (e) => {
     e.preventDefault();
+    localStorage.setItem('sentinel_target', target);
     navigate('/scan');
   };
 
@@ -17,21 +20,25 @@ export default function DashboardSetup() {
         <form onSubmit={handleInit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', textAlign: 'left' }}>
           <div>
             <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Target Environment</label>
-            <select style={{ width: '100%', padding: '0.5rem', background: 'rgba(0,0,0,0.5)', border: '1px solid #333', color: 'white', borderRadius: '4px' }}>
-              <option>OWASP Juice Shop (Web)</option>
-              <option>DVWA (Damn Vulnerable Web App)</option>
-              <option>Corporate Internal Lab XYZ</option>
+            <select 
+              value={target}
+              onChange={(e) => setTarget(e.target.value)}
+              style={{ width: '100%', padding: '0.5rem', background: 'rgba(0,0,0,0.5)', border: '1px solid #333', color: 'white', borderRadius: '4px', cursor: 'pointer' }}
+            >
+              <option value="corp_lab">Corporate Internal Lab XYZ</option>
+              <option value="juice_shop">OWASP Juice Shop (Web Ecommerce)</option>
+              <option value="legacy_db">Legacy Database Server</option>
             </select>
           </div>
           <div>
             <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Default Posture</label>
             <select style={{ width: '100%', padding: '0.5rem', background: 'rgba(0,0,0,0.5)', border: '1px solid #333', color: 'white', borderRadius: '4px' }}>
               <option>Vulnerable (No Defenses)</option>
-              <option>Hardened (Out-of-box security)</option>
+              <option disabled>Hardened (Pro Version Only)</option>
             </select>
           </div>
           <button type="submit" className="btn-primary" style={{ marginTop: '1rem' }}>
-            Initialize Lab & Connect
+            Initialize Environment & Connect
           </button>
         </form>
       </div>

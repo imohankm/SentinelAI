@@ -2,17 +2,32 @@ import { useState, useEffect } from 'react'
 import { Wrench, ShieldCheck, Activity } from 'lucide-react'
 
 export default function FixEngine() {
-  const [mfaEnabled, setMfaEnabled] = useState(false);
-  const [sqlPatched, setSqlPatched] = useState(false);
-  const [portsClosed, setPortsClosed] = useState(false);
+  const [fixes, setFixes] = useState({});
+  const [vulnerabilities, setVulnerabilities] = useState([]);
+  const [baseRisk, setBaseRisk] = useState(85);
   
-  const [successRate, setSuccessRate] = useState(85); // Before score
+  const [successRate, setSuccessRate] = useState(85);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
-    const payload = { mfa_enabled: mfaEnabled, sql_patched: sqlPatched, ports_closed: portsClosed };
+    const targetId = localStorage.getItem('sentinel_target') || 'corp_lab';
     const API_URL = import.meta.env.VITE_API_URL || 'https://sentinelai-jq5d.onrender.com';
+    
+    fetch(`${API_URL}/api/scan?target_id=${targetId}`)
+      .then(res => res.json())
+      .then(data => {
+        setVulnerabilities(data.vulnerabilities || []);
+        setBaseRisk(data.base_risk_score || 85);
+        setSuccessRate(data.base_risk_score || 85);
+      })
+      .catch(err => console.error("Error fetching vulns for fix engine", err));
+  }, []);
+
+  useEffect(() => {
+    setLoading(true);
+    const targetId = localStorage.getItem('sentinel_target') || 'corp_lab';
+    const API_URL = import.meta.env.VITE_API_URL || 'https://sentinelai-jq5d.onrender.com';
+    const payload = { fixes: fixes, scenario: "full_chain", target_id: targetId };
     
     fetch(`${API_URL}/api/attack`, {
       method: 'POST',
@@ -26,15 +41,15 @@ export default function FixEngine() {
     })
     .catch(err => {
       console.error("Backend offline", err);
-      // Fallback calculation matching backend logic
-      let rate = 85;
-      if (portsClosed) rate -= 20;
-      if (sqlPatched) rate -= 30;
-      if (mfaEnabled) rate -= 15;
+      // Fallback calculation matching backend logic simply
+      let rate = baseRisk;
+      Object.keys(fixes).forEach(k => {
+        if (fixes[k]) rate -= 25; // Simple fallback math
+      });
       setSuccessRate(Math.max(0, rate));
       setLoading(false);
     });
-  }, [mfaEnabled, sqlPatched, portsClosed]);
+  }, [fixes, baseRisk]);
 
   return (
     <div>
@@ -47,41 +62,22 @@ export default function FixEngine() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 2fr', gap: '2rem' }}>
         <div className="glass-panel" style={{ padding: '2rem' }}>
-          <h3 style={{ marginTop: 0 }}>Fix Toggles</h3>
+          <h3 style={{ marginTop: 0 }}>Active Threat Defenses</h3>
           
           <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <strong>Close External Ports</strong>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>Block traffic to 22 & 3389</p>
+            {vulnerabilities.map(vuln => (
+              <div key={vuln.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <strong>{vuln.fix_label}</strong>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>{vuln.fix_desc}</p>
+                </div>
+                <label style={{ display: 'block', width: '60px', height: '30px', background: fixes[vuln.id] ? 'var(--neon-green)' : '#333', borderRadius: '15px', position: 'relative', cursor: 'pointer', transition: 'all 0.3s' }}>
+                  <input type="checkbox" style={{ display: 'none' }} checked={!!fixes[vuln.id]} onChange={() => setFixes({...fixes, [vuln.id]: !fixes[vuln.id]})} />
+                  <div style={{ width: '26px', height: '26px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', left: fixes[vuln.id] ? '32px' : '2px', transition: 'all 0.3s' }}></div>
+                </label>
               </div>
-              <label style={{ display: 'block', width: '60px', height: '30px', background: portsClosed ? 'var(--neon-green)' : '#333', borderRadius: '15px', position: 'relative', cursor: 'pointer', transition: 'all 0.3s' }}>
-                <input type="checkbox" style={{ display: 'none' }} checked={portsClosed} onChange={() => setPortsClosed(!portsClosed)} />
-                <div style={{ width: '26px', height: '26px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', left: portsClosed ? '32px' : '2px', transition: 'all 0.3s' }}></div>
-              </label>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <strong>Patch SQL Vuls</strong>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>Sanitize /api/auth inputs</p>
-              </div>
-              <label style={{ display: 'block', width: '60px', height: '30px', background: sqlPatched ? 'var(--neon-cyan)' : '#333', borderRadius: '15px', position: 'relative', cursor: 'pointer', transition: 'all 0.3s' }}>
-                <input type="checkbox" style={{ display: 'none' }} checked={sqlPatched} onChange={() => setSqlPatched(!sqlPatched)} />
-                <div style={{ width: '26px', height: '26px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', left: sqlPatched ? '32px' : '2px', transition: 'all 0.3s' }}></div>
-              </label>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <strong>Enable MFA</strong>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>Require 2FA globally</p>
-              </div>
-              <label style={{ display: 'block', width: '60px', height: '30px', background: mfaEnabled ? 'var(--neon-purple)' : '#333', borderRadius: '15px', position: 'relative', cursor: 'pointer', transition: 'all 0.3s' }}>
-                <input type="checkbox" style={{ display: 'none' }} checked={mfaEnabled} onChange={() => setMfaEnabled(!mfaEnabled)} />
-                <div style={{ width: '26px', height: '26px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '2px', left: mfaEnabled ? '32px' : '2px', transition: 'all 0.3s' }}></div>
-              </label>
-            </div>
+            ))}
+            {vulnerabilities.length === 0 && <p style={{color: 'var(--text-muted)'}}>Loading defenses...</p>}
           </div>
         </div>
 
@@ -97,7 +93,7 @@ export default function FixEngine() {
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
                 margin: '0 auto 1rem auto', boxShadow: `0 0 20px rgba(239, 68, 68, 0.3)`
               }}>
-                <span style={{ fontSize: '3rem', fontWeight: 'bold' }}>85%</span>
+                <span style={{ fontSize: '3rem', fontWeight: 'bold' }}>{baseRisk}%</span>
               </div>
               <span style={{ color: 'var(--text-muted)' }}>Initial Attack Success</span>
             </div>
@@ -121,9 +117,9 @@ export default function FixEngine() {
           </div>
 
           <div style={{ display: 'flex', gap: '20px', marginTop: '2rem', justifyContent: 'center' }}>
-            { successRate < 85 && (
+            { successRate < baseRisk && (
               <div style={{ background: 'rgba(255,255,255,0.05)', padding: '10px 20px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--neon-green)' }}>
-                <ShieldCheck size={18} /> Attack Surface Reduced by {85 - successRate}%
+                <ShieldCheck size={18} /> Attack Surface Reduced by {baseRisk - successRate}%
               </div>
             )}
           </div>
@@ -134,7 +130,7 @@ export default function FixEngine() {
       <div className="glass-panel" style={{ padding: '1.5rem', marginTop: '2rem' }}>
         <h4 style={{ margin: '0 0 10px 0', color: 'var(--neon-cyan)' }}>Real-World Application Options</h4>
         <div style={{display: 'flex', gap: '1rem'}}>
-           <button className="btn-primary" disabled={successRate > 20}>Deploy Fixes to Production</button>
+           <button className="btn-primary" disabled={successRate > 25}>Deploy Fixes to Production</button>
            <button className="btn-primary" style={{background: 'rgba(255,255,255,0.1)', border: '1px solid #444', color: 'white'}}>Generate DevOps Ticketing (JIRA)</button>
         </div>
       </div>
