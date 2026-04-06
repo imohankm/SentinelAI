@@ -1,44 +1,79 @@
 import React, { useState } from 'react';
-import { Shield, Fingerprint, Key, Clock, Users, Mail, AlertTriangle, FileText, Activity } from 'lucide-react';
+import { Shield, Fingerprint, Key, Clock, Users, Mail, AlertTriangle, FileText, Activity, ToggleLeft, ToggleRight, CheckCircle2 } from 'lucide-react';
 
 export default function ComplianceDashboard() {
   const [activeTab, setActiveTab] = useState('identity');
+  
+  // State for all toggles
+  const [policies, setPolicies] = useState({
+    "Password + Fingerprint Login": true,
+    "OTP + Brute-force Protection": true,
+    "Company Email Verification": false,
+    "Session Clearing": true,
+    "Admin ID with 30-day Expiry": false,
+    "5-day Expiry Warning": true,
+    "Auto Update Next Admin ID": false,
+    "Admin Member Management": true,
+    "Alert if Too Many Members": true,
+    "Phishing Detection": false,
+    "Antivirus Risk Check": true,
+    "File Protection (Popup Warn)": false,
+    "Alerts for Valid Users": true
+  });
+
+  const togglePolicy = (key) => {
+    setPolicies(prev => ({ ...prev, [key]: !prev[key] }));
+  };
 
   const identityFeatures = [
-    { name: "Password + Fingerprint Login", status: "Secured", icon: <Fingerprint size={20} className="text-green-400" /> },
-    { name: "OTP + Brute-force Protection", status: "Active", icon: <Key size={20} className="text-green-400" /> },
-    { name: "Company Email Verification", status: "Required", icon: <Mail size={20} className="text-green-400" /> },
-    { name: "Session Clearing", status: "Automated", icon: <Clock size={20} className="text-green-400" /> }
+    { name: "Password + Fingerprint Login", activeStatus: "Secured", icon: <Fingerprint size={20} className="text-gray-400" /> },
+    { name: "OTP + Brute-force Protection", activeStatus: "Active", icon: <Key size={20} className="text-gray-400" /> },
+    { name: "Company Email Verification", activeStatus: "Required", icon: <Mail size={20} className="text-gray-400" /> },
+    { name: "Session Clearing", activeStatus: "Automated", icon: <Clock size={20} className="text-gray-400" /> }
   ];
 
   const adminFeatures = [
-    { name: "Admin ID with 30-day Expiry", status: "Enforced", icon: <Shield size={20} className="text-purple-400" /> },
-    { name: "5-day Expiry Warning", status: "Monitored", icon: <AlertTriangle size={20} className="text-yellow-400" /> },
-    { name: "Auto Update Next Admin ID", status: "Enabled", icon: <Activity size={20} className="text-blue-400" /> },
-    { name: "Admin Member Management", status: "Verified", icon: <Users size={20} className="text-blue-400" /> },
-    { name: "Alert if Too Many Members", status: "Active", icon: <AlertTriangle size={20} className="text-yellow-400" /> }
+    { name: "Admin ID with 30-day Expiry", activeStatus: "Enforced", icon: <Shield size={20} className="text-gray-400" /> },
+    { name: "5-day Expiry Warning", activeStatus: "Monitored", icon: <AlertTriangle size={20} className="text-gray-400" /> },
+    { name: "Auto Update Next Admin ID", activeStatus: "Enabled", icon: <Activity size={20} className="text-gray-400" /> },
+    { name: "Admin Member Management", activeStatus: "Verified", icon: <Users size={20} className="text-gray-400" /> },
+    { name: "Alert if Too Many Members", activeStatus: "Active", icon: <AlertTriangle size={20} className="text-gray-400" /> }
   ];
 
   const threatFeatures = [
-    { name: "Phishing Detection", status: "Scanning", icon: <AlertTriangle size={20} className="text-red-400" /> },
-    { name: "Antivirus Risk Check", status: "Operational", icon: <Shield size={20} className="text-green-400" /> },
-    { name: "File Protection (Popup Warn)", status: "Enabled", icon: <FileText size={20} className="text-blue-400" /> },
-    { name: "Alerts for Valid Users", status: "Logging", icon: <Activity size={20} className="text-purple-400" /> }
+    { name: "Phishing Detection", activeStatus: "Scanning", icon: <AlertTriangle size={20} className="text-gray-400" /> },
+    { name: "Antivirus Risk Check", activeStatus: "Operational", icon: <Shield size={20} className="text-gray-400" /> },
+    { name: "File Protection (Popup Warn)", activeStatus: "Enabled", icon: <FileText size={20} className="text-gray-400" /> },
+    { name: "Alerts for Valid Users", activeStatus: "Logging", icon: <Activity size={20} className="text-gray-400" /> }
   ];
 
   const renderList = (features) => (
     <div className="grid gap-4 mt-4">
-      {features.map((f, i) => (
-        <div key={i} className="flex items-center justify-between p-4 bg-[#111] rounded-lg border border-[#333]">
-          <div className="flex items-center gap-3">
-            {f.icon}
-            <span className="text-gray-200">{f.name}</span>
+      {features.map((f, i) => {
+        const isActive = policies[f.name];
+        return (
+          <div key={i} className={`flex items-center justify-between p-4 rounded-lg border transition-colors cursor-pointer ${isActive ? 'bg-[#111] border-[#333]' : 'bg-[#0a0a0c] border-[#222]'}`} onClick={() => togglePolicy(f.name)}>
+            <div className="flex items-center gap-4">
+              <div style={{ color: isActive ? '#06b6d4' : '#666' }}>
+                {f.icon}
+              </div>
+              <div>
+                <div className={isActive ? "text-gray-200 font-semibold" : "text-gray-500"}>{f.name}</div>
+                <div className="text-xs mt-1" style={{ color: isActive ? '#10b981' : '#ed333b' }}>
+                  {isActive ? f.activeStatus : 'Disabled'}
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              {isActive ? 
+                <ToggleRight size={32} className="text-cyan-500" /> : 
+                <ToggleLeft size={32} className="text-gray-600" />
+              }
+            </div>
           </div>
-          <span className="text-sm font-semibold px-3 py-1 bg-[#222] rounded-full text-gray-300">
-            {f.status}
-          </span>
-        </div>
-      ))}
+        )
+      })}
     </div>
   );
 
@@ -47,28 +82,38 @@ export default function ComplianceDashboard() {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2 m-0 text-white">
-            <Shield className="text-blue-500" /> Identity & Compliance Hub
+            <Shield className="neon-text-cyan" /> Identity & Compliance Hub
           </h2>
-          <p className="text-gray-400 mt-2">Managing zero-trust policies, IAM, and active threat monitoring.</p>
+          <p className="text-gray-400 mt-2">Dynamically manage zero-trust policies, IAM, and enforce active threat monitoring.</p>
         </div>
+        
+        <button 
+          className="btn-primary flex gap-2 items-center" 
+          onClick={() => {
+            const allEnabled = Object.keys(policies).reduce((acc, key) => ({...acc, [key]: true}), {});
+            setPolicies(allEnabled);
+          }}
+        >
+          <CheckCircle2 size={18} /> Enforce All Policies
+        </button>
       </div>
 
       <div className="flex gap-4 mb-6 border-b border-[#333] pb-2">
         <button 
           onClick={() => setActiveTab('identity')}
-          className={`px-4 py-2 font-semibold ${activeTab === 'identity' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-500 hover:text-gray-300'}`}
+          className={`px-4 py-2 font-semibold ${activeTab === 'identity' ? 'text-cyan-400 border-b-2 border-cyan-400' : 'text-gray-500 hover:text-gray-300'}`}
         >
           Access & Identity
         </button>
         <button 
           onClick={() => setActiveTab('admin')}
-          className={`px-4 py-2 font-semibold ${activeTab === 'admin' ? 'text-purple-400 border-b-2 border-purple-400' : 'text-gray-500 hover:text-gray-300'}`}
+          className={`px-4 py-2 font-semibold ${activeTab === 'admin' ? 'text-cyan-400 border-b-2 border-cyan-400' : 'text-gray-500 hover:text-gray-300'}`}
         >
           Admin & Governance
         </button>
         <button 
           onClick={() => setActiveTab('threats')}
-          className={`px-4 py-2 font-semibold ${activeTab === 'threats' ? 'text-red-400 border-b-2 border-red-400' : 'text-gray-500 hover:text-gray-300'}`}
+          className={`px-4 py-2 font-semibold ${activeTab === 'threats' ? 'text-cyan-400 border-b-2 border-cyan-400' : 'text-gray-500 hover:text-gray-300'}`}
         >
           Threat Intelligence
         </button>
