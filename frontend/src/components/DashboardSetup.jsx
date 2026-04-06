@@ -45,6 +45,34 @@ export default function DashboardSetup() {
             Initialize Live Scan Sequence
           </button>
         </form>
+
+        <div style={{ marginTop: '2.5rem', borderTop: '1px solid #333', paddingTop: '1.5rem' }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Local Lab Quick-Select</p>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                {[8080, 8081, 8082].map(port => (
+                    <button
+                        key={port}
+                        onClick={() => {
+                            setTargetIp(`127.0.0.1:${port}`);
+                        }}
+                        style={{
+                            background: 'rgba(6, 182, 212, 0.1)',
+                            border: '1px solid var(--neon-cyan)',
+                            color: 'var(--neon-cyan)',
+                            padding: '6px 12px',
+                            borderRadius: '20px',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem',
+                            transition: 'all 0.3s'
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.background = 'rgba(6, 182, 212, 0.2)'}
+                        onMouseOut={(e) => e.currentTarget.style.background = 'rgba(6, 182, 212, 0.1)'}
+                    >
+                        localhost:{port}
+                    </button>
+                ))}
+            </div>
+        </div>
       </div>
     </div>
   )
