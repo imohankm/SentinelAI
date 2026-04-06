@@ -1,11 +1,31 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict
 import requests
 from scanner import run_live_scan
 
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from starlette.middleware.base import BaseHTTPMiddleware
+
 app = FastAPI(title="SentinelAI Dynamic DAST Engine API")
+
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        return response
+
+app.add_middleware(SecurityHeadersMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
@@ -25,11 +45,13 @@ def read_root():
     return {"status": "SentinelAI DAST Engine Active", "version": "3.0"}
 
 @app.get("/api/scan")
-def get_vulnerabilities(target_ip: str = "127.0.0.1"):
+@limiter.limit("10/minute")
+def get_vulnerabilities(request: Request, target_ip: str = "127.0.0.1"):
     return run_live_scan(target_ip)
 
 @app.post("/api/attack")
-def run_attack_simulation(req: FixStateRequest):
+@limiter.limit("10/minute")
+def run_attack_simulation(request: Request, req: FixStateRequest):
     target_ip = req.target_ip
     logs = [f"[INFO] Initiating Live Modular Attack Agent against {target_ip}..."]
     
