@@ -1,6 +1,7 @@
 import socket
 import concurrent.futures
 import requests
+import urllib.parse
 
 # Common ports mapped to likely services for the demo context
 PORTS_TO_SCAN = {
@@ -101,12 +102,19 @@ def run_live_scan(target_ip: str):
     Main entrypoint. Resolves host, concurrent scans the standard ports,
     and returns dynamically generated vulnerabilities.
     """
+    # Clean up URIs to raw domains/IPs
+    clean_ip = target_ip
+    if '://' in clean_ip:
+        clean_ip = urllib.parse.urlparse(clean_ip).netloc
+    if ':' in clean_ip:
+        clean_ip = clean_ip.split(':')[0]
+        
     try:
         # Resolve hostname to IP safely
-        ip = socket.gethostbyname(target_ip)
+        ip = socket.gethostbyname(clean_ip)
     except socket.gaierror:
         # If it's totally invalid, we fallback softly
-        ip = target_ip
+        ip = clean_ip
         
     open_ports = []
     
