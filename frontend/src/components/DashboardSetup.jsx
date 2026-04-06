@@ -34,7 +34,7 @@ export default function DashboardSetup() {
             <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Default Posture</label>
             <select style={{ width: '100%', padding: '0.5rem', background: 'rgba(0,0,0,0.5)', border: '1px solid #333', color: 'white', borderRadius: '4px' }}>
               <option>Vulnerable (No Defenses)</option>
-              <option disabled>Hardened (Pro Version Only)</option>
+              <option>Hardened (Out-of-box security)</option>
             </select>
           </div>
           <button type="submit" className="btn-primary" style={{ marginTop: '1rem' }}>
