@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { Shield, Server, Search, Activity, Wrench } from 'lucide-react'
+import { Shield, Server, Search, Activity, Wrench, FileText } from 'lucide-react'
 
 export default function Navbar() {
   return (
@@ -23,6 +23,9 @@ export default function Navbar() {
         </NavLink>
         <NavLink to="/compliance" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
           <Shield size={18} /> IAM & Compliance
+        </NavLink>
+        <NavLink to="/report" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
+          <FileText size={18} /> Final Report
         </NavLink>
       </div>
     </nav>
