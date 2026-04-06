@@ -7,10 +7,9 @@ def main():
     
     # List of server scripts to run
     servers = [
-        {"file": "server.py", "port": 8080, "name": "Main Demo API"},
-        {"file": "server_ecommerce.py", "port": 8081, "name": "E-Commerce Web App"},
-        {"file": "server_legacy.py", "port": 8082, "name": "Legacy DB Server"},
-        {"file": "server_hr_portal.py", "port": 8083, "name": "HR Portal"}
+        {"file": "server_corporate_lab.py", "port": 8080, "name": "Corporate Internal Lab XYZ"},
+        {"file": "server_juice_shop.py", "port": 8081, "name": "OWASP Juice Shop"},
+        {"file": "server_legacy_database.py", "port": 8082, "name": "Legacy Database Server"}
     ]
     
     processes = []
