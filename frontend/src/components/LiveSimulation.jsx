@@ -13,7 +13,8 @@ export default function LiveSimulation() {
   const startSimulation = () => {
     setHasStarted(true);
     const targetIp = localStorage.getItem('sentinel_target_ip') || '127.0.0.1';
-    const payload = { fixes: {}, scenario: selectedScenario, target_ip: targetIp };
+    const appliedFixes = JSON.parse(localStorage.getItem('sentinel_applied_fixes') || '{}');
+    const payload = { fixes: appliedFixes, scenario: selectedScenario, target_ip: targetIp };
     const API_URL = import.meta.env.VITE_API_URL || 'https://sentinelai-jq5d.onrender.com';
     
     fetch(`${API_URL}/api/attack`, {
@@ -46,10 +47,10 @@ export default function LiveSimulation() {
   };
 
   const scenarios = [
-    { id: "full_chain", title: "Full Chain Exfiltration", icon: <Globe size={32} />, desc: "Default AI-driven attack exploiting authentication, database, and network misconfigurations." },
-    { id: "ransomware", title: "Ransomware Deployment", icon: <ShieldAlert size={32} />, desc: "Simulate an adversary deploying an encryption payload against your core file servers." },
-    { id: "ddos_syn", title: "DDoS / SYN Flood", icon: <Wifi size={32} />, desc: "Simulate a volumetric denial-of-service attack targeting your web ingress points." },
-    { id: "phishing", title: "Spear Phishing", icon: <Users size={32} />, desc: "Measure resilience against targeted social engineering and credential harvesting." }
+    { id: "full_chain", title: "Automated Payload Chain", icon: <Globe size={32} />, desc: "Execute a multi-stage autonomous recon and exploit chain against all discovered open ports." },
+    { id: "ransomware", title: "Data Persistence Test", icon: <ShieldAlert size={32} />, desc: "Test system resilience against unauthorized binary execution and file-system persistence attempts." },
+    { id: "ddos_syn", title: "SYN Flood Resilience", icon: <Wifi size={32} />, desc: "Measure how your network ingress handles high-volume TCP SYN packet saturation." },
+    { id: "phishing", title: "Auth-Bypass Simulation", icon: <Users size={32} />, desc: "Test if exposed web-auth services can be bypassed via credential-harvesting logic." }
   ];
 
   if (!hasStarted) {

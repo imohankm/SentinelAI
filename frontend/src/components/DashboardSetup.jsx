@@ -18,8 +18,8 @@ export default function DashboardSetup() {
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
             <Server size={48} className="neon-text-cyan" />
         </div>
-        <h1 style={{ marginBottom: '0.5rem' }}>Dynamic <span className="neon-text-cyan">Reconnaissance</span></h1>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>Provide an IPv4 address, hostname, or URL to execute a live vulnerability scan.</p>
+        <h1 style={{ marginBottom: '0.5rem' }}>Dynamic <span className="neon-text-cyan">DAST Configuration</span></h1>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>Define an IPv4 address, hostname, or local URL to initialize the live penetration testing sequence.</p>
         
         <form onSubmit={handleInit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', textAlign: 'left' }}>
           <div>
