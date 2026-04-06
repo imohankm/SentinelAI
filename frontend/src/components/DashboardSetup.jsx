@@ -5,35 +5,33 @@ export default function DashboardSetup() {
 
   const handleInit = (e) => {
     e.preventDefault();
-    navigate('/twin');
+    navigate('/scan');
   };
 
   return (
     <div style={{ height: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div className="glass-panel" style={{ padding: '3rem', width: '100%', maxWidth: '500px', textAlign: 'center' }}>
-        <h1 style={{ marginBottom: '0.5rem' }}>Deploy Your <span className="neon-text-cyan">Digital Twin</span></h1>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>Configure organizational simulation parameters.</p>
+        <h1 style={{ marginBottom: '0.5rem' }}>Setup <span className="neon-text-cyan">Simulated Server</span></h1>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>Provision a mock environment for authorized penetration testing.</p>
         
         <form onSubmit={handleInit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', textAlign: 'left' }}>
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Organization Name</label>
-            <input type="text" placeholder="XYZ Tech" required defaultValue="XYZ Tech" />
-          </div>
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Employee Count</label>
-            <select>
-              <option>1 - 50</option>
-              <option selected>5 - 10</option>
-              <option>50 - 250</option>
-              <option>250+</option>
+            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Target Environment</label>
+            <select style={{ width: '100%', padding: '0.5rem', background: 'rgba(0,0,0,0.5)', border: '1px solid #333', color: 'white', borderRadius: '4px' }}>
+              <option>OWASP Juice Shop (Web)</option>
+              <option>DVWA (Damn Vulnerable Web App)</option>
+              <option>Corporate Internal Lab XYZ</option>
             </select>
           </div>
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Base Security Posture</label>
-            <input type="range" min="1" max="10" defaultValue="4" />
+            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Default Posture</label>
+            <select style={{ width: '100%', padding: '0.5rem', background: 'rgba(0,0,0,0.5)', border: '1px solid #333', color: 'white', borderRadius: '4px' }}>
+              <option>Vulnerable (No Defenses)</option>
+              <option>Hardened (Out-of-box security)</option>
+            </select>
           </div>
           <button type="submit" className="btn-primary" style={{ marginTop: '1rem' }}>
-            Initialize Twin
+            Initialize Lab & Connect
           </button>
         </form>
       </div>

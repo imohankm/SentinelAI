@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { Shield, Activity, Users, AlertTriangle, ShieldCheck } from 'lucide-react'
+import { Shield, Server, Search, Activity, Wrench } from 'lucide-react'
 
 export default function Navbar() {
   return (
@@ -10,19 +10,16 @@ export default function Navbar() {
       </div>
       <div className="nav-links">
         <NavLink to="/" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
-          Setup
+          <Server size={18} /> Lab Setup
         </NavLink>
-        <NavLink to="/twin" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
-          <Users size={18} /> Twin
+        <NavLink to="/scan" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
+          <Search size={18} /> Scan
         </NavLink>
-        <NavLink to="/simulation" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
-          <Activity size={18} /> Simulation
+        <NavLink to="/attack" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
+          <Activity size={18} /> Attack
         </NavLink>
-        <NavLink to="/risk" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
-          <AlertTriangle size={18} /> Risk Map
-        </NavLink>
-        <NavLink to="/whatif" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
-          <ShieldCheck size={18} /> What-If
+        <NavLink to="/fix" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
+          <Wrench size={18} /> Fix Engine
         </NavLink>
       </div>
     </nav>
