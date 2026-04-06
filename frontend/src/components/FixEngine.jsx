@@ -19,6 +19,8 @@ export default function FixEngine() {
 
   const handleDeploy = () => {
     setToast("Deploying configuration changes via simulated CI/CD...");
+    localStorage.setItem('sentinel_final_success_rate', successRate);
+    localStorage.setItem('sentinel_applied_fixes', JSON.stringify(fixes));
     setTimeout(() => {
         navigate('/report');
     }, 2000);

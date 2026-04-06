@@ -7,6 +7,8 @@ export default function FinalReport() {
   const [vulnerabilities, setVulnerabilities] = useState([]);
   const [baseRisk, setBaseRisk] = useState(85);
   const [targetIp, setTargetIp] = useState('127.0.0.1');
+  const [finalRisk, setFinalRisk] = useState(0);
+  const [appliedFixes, setAppliedFixes] = useState(null);
 
   useEffect(() => {
     const ip = localStorage.getItem('sentinel_target_ip') || '127.0.0.1';
@@ -20,6 +22,16 @@ export default function FinalReport() {
         setBaseRisk(data.base_risk_score || 85);
       })
       .catch(err => console.error("Error fetching vulns for report", err));
+
+    const storedFinalRisk = localStorage.getItem('sentinel_final_success_rate');
+    if (storedFinalRisk) setFinalRisk(parseInt(storedFinalRisk));
+    
+    const storedFixes = localStorage.getItem('sentinel_applied_fixes');
+    if (storedFixes) {
+      try {
+        setAppliedFixes(JSON.parse(storedFixes));
+      } catch (e) {}
+    }
   }, []);
 
   return (
@@ -73,15 +85,19 @@ export default function FinalReport() {
             </div>
             <div className="flex justify-between border-b border-green-900/30 pb-2">
               <span className="text-gray-400">Attack Success Rate</span>
-              <span className="text-green-400 font-bold">0%</span>
+              <span className={`font-bold ${finalRisk > 50 ? 'text-red-400' : finalRisk > 20 ? 'text-purple-400' : 'text-green-400'}`}>{finalRisk}%</span>
             </div>
             <div className="pt-2">
               <span className="text-gray-400 block mb-2">Automated Fixes Applied:</span>
               <ul className="text-sm space-y-1 text-gray-300">
-                {vulnerabilities.map(v => (
-                   <li key={`fix-${v.id}`}><CheckCircle2 size={14} className="inline text-green-500 mr-1"/> {v.fix_label}</li>
+                {vulnerabilities
+                  .filter(v => appliedFixes === null || appliedFixes[v.id])
+                  .map(v => (
+                    <li key={`fix-${v.id}`}><CheckCircle2 size={14} className="inline text-green-500 mr-1"/> {v.fix_label}</li>
                 ))}
-                {vulnerabilities.length === 0 && <li><CheckCircle2 size={14} className="inline text-green-500 mr-1"/> System Secured</li>}
+                {((appliedFixes !== null && vulnerabilities.filter(v => appliedFixes[v.id]).length === 0) || vulnerabilities.length === 0) && (
+                   <li><AlertTriangle size={14} className="inline text-yellow-500 mr-1"/> No specific fixes applied</li>
+                )}
               </ul>
             </div>
           </div>
