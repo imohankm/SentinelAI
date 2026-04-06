@@ -4,6 +4,7 @@ import DashboardSetup from './components/DashboardSetup'
 import VulnerabilityScanner from './components/VulnerabilityScanner'
 import LiveSimulation from './components/LiveSimulation'
 import FixEngine from './components/FixEngine'
+import ComplianceDashboard from './components/ComplianceDashboard'
 import './App.css'
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
           <Route path="/scan" element={<VulnerabilityScanner />} />
           <Route path="/attack" element={<LiveSimulation />} />
           <Route path="/fix" element={<FixEngine />} />
+          <Route path="/compliance" element={<ComplianceDashboard />} />
         </Routes>
       </main>
     </div>

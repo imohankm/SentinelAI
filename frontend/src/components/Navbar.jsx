@@ -21,6 +21,9 @@ export default function Navbar() {
         <NavLink to="/fix" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
           <Wrench size={18} /> Fix Engine
         </NavLink>
+        <NavLink to="/compliance" className={({isActive}) => isActive ? "nav-link active" : "nav-link"}>
+          <Shield size={18} /> IAM & Compliance
+        </NavLink>
       </div>
     </nav>
   )
