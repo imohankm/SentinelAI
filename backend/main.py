@@ -8,7 +8,11 @@ app = FastAPI(title="SentinelAI Simulation Engine API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=[
+        "http://localhost:5173", 
+        "http://127.0.0.1:5173", 
+        "https://sentinel-ai-brown.vercel.app"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -49,21 +53,40 @@ def get_vulnerabilities():
             vulnerabilities.append({"id": "V3", "name": "Open Ports Detected", "severity": "Medium", "description": "Ports 22, 3389 exposed to external internet."})
             base_risk += 20
     except requests.exceptions.ConnectionError:
-        return {"error": "Demo server is offline. Please start it on port 8080."}
+        # Fallback for Render Hosted Environment
+        base_risk = 85
+        vulnerabilities = [
+            {"id": "V1", "name": "No MFA Enabled", "severity": "High", "description": "Global user authentication lacks Multi-Factor Authentication."},
+            {"id": "V2", "name": "SQL Injection Possible", "severity": "Critical", "description": "Login endpoint /api/auth is susceptible to SQLi."},
+            {"id": "V3", "name": "Open Ports Detected", "severity": "Medium", "description": "Ports 22, 3389 exposed to external internet."}
+        ]
 
     return {
         "target": "Acme Corp Demo Server",
         "vulnerabilities": vulnerabilities,
-        "base_risk_score": base_risk if base_risk > 0 else 15  # 15 is baseline risk
+        "base_risk_score": base_risk if base_risk > 0 else 15
     }
 
 @app.post("/api/attack")
 def run_attack_simulation(req: FixStateRequest):
-    # First, configure the real demo server with requested fixes
     try:
         requests.post(f"{DEMO_URL}/devops/patch", json=req.dict())
     except requests.exceptions.ConnectionError:
-        return {"error": "Demo server is offline"}
+        # Fallback for Hosted Environment (Render) where localhost:8080 isn't available
+        base_success_rate = 85
+        if req.ports_closed: base_success_rate -= 20
+        if req.sql_patched: base_success_rate -= 30
+        if req.mfa_enabled: base_success_rate -= 15
+        return {
+            "success_rate": max(0, base_success_rate),
+            "logs": [
+                "[INFO] Initiating Agentic Attacker Module... (Simulated Hosted Mode)",
+                "[THINK] I need to gain root access to the target web property.",
+                "[DECIDE] Enumerating attack surface...",
+                "[ACT] Attacking endpoints...",
+                "[RESULT] Demo Server offline. Simulated fallback logic applied based on toggles."
+            ]
+        }
 
     base_success_rate = 85
     logs = [

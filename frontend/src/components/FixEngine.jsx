@@ -12,8 +12,9 @@ export default function FixEngine() {
   useEffect(() => {
     setLoading(true);
     const payload = { mfa_enabled: mfaEnabled, sql_patched: sqlPatched, ports_closed: portsClosed };
+    const API_URL = import.meta.env.VITE_API_URL || 'https://sentinelai-jq5d.onrender.com';
     
-    fetch('http://localhost:8000/api/attack', {
+    fetch(`${API_URL}/api/attack`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
