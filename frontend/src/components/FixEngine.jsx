@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Wrench, ShieldCheck, Activity } from 'lucide-react'
 
 export default function FixEngine() {
@@ -8,6 +9,20 @@ export default function FixEngine() {
   
   const [successRate, setSuccessRate] = useState(85);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const [toast, setToast] = useState(null);
+
+  const handleJira = () => {
+    setToast("JIRA API: Created Epic SEC-404 spanning required security patches.");
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleDeploy = () => {
+    setToast("Deploying configuration changes via simulated CI/CD...");
+    setTimeout(() => {
+        navigate('/report');
+    }, 2000);
+  };
 
   useEffect(() => {
     const targetIp = localStorage.getItem('sentinel_target_ip') || '127.0.0.1';
@@ -139,10 +154,22 @@ export default function FixEngine() {
       <div className="glass-panel" style={{ padding: '1.5rem', marginTop: '2rem' }}>
         <h4 style={{ margin: '0 0 10px 0', color: 'var(--neon-cyan)' }}>Real-World Application Options</h4>
         <div style={{display: 'flex', gap: '1rem'}}>
-           <button className="btn-primary" disabled={successRate > 25}>Deploy Fixes to Production</button>
-           <button className="btn-primary" style={{background: 'rgba(255,255,255,0.1)', border: '1px solid #444', color: 'white'}}>Generate DevOps Ticketing (JIRA)</button>
+           <button className="btn-primary" disabled={successRate > 25} onClick={handleDeploy}>Deploy Fixes to Production</button>
+           <button className="btn-primary" style={{background: 'rgba(255,255,255,0.1)', border: '1px solid #444', color: 'white'}} onClick={handleJira}>Generate DevOps Ticketing (JIRA)</button>
         </div>
       </div>
+
+      {toast && (
+          <div style={{
+              position: 'fixed', bottom: '20px', right: '20px', 
+              background: 'var(--neon-green)', color: 'black', 
+              padding: '1rem 2rem', borderRadius: '8px', 
+              fontWeight: 'bold', boxShadow: '0 0 20px rgba(34, 197, 94, 0.5)',
+              zIndex: 1000
+          }}>
+              {toast}
+          </div>
+      )}
     </div>
   )
 }
