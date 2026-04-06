@@ -39,4 +39,4 @@ def download_backup():
     return {"status": "success", "file": "dump.db", "base64_data": encoded}
 
 if __name__ == "__main__":
-    uvicorn.run("server_legacy:app", host="0.0.0.0", port=8082, reload=False)
+    uvicorn.run("server_legacy_database:app", host="0.0.0.0", port=8082, reload=False)

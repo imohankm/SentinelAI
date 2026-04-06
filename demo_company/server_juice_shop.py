@@ -49,4 +49,4 @@ def search(query: str):
     }
 
 if __name__ == "__main__":
-    uvicorn.run("server_ecommerce:app", host="0.0.0.0", port=8081, reload=False)
+    uvicorn.run("server_juice_shop:app", host="0.0.0.0", port=8081, reload=False)
