@@ -12,8 +12,8 @@ export default function LiveSimulation() {
 
   const startSimulation = () => {
     setHasStarted(true);
-    const targetId = localStorage.getItem('sentinel_target') || 'corp_lab';
-    const payload = { fixes: {}, scenario: selectedScenario, target_id: targetId };
+    const targetIp = localStorage.getItem('sentinel_target_ip') || '127.0.0.1';
+    const payload = { fixes: {}, scenario: selectedScenario, target_ip: targetIp };
     const API_URL = import.meta.env.VITE_API_URL || 'https://sentinelai-jq5d.onrender.com';
     
     fetch(`${API_URL}/api/attack`, {
