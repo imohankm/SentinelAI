@@ -76,9 +76,11 @@ export default function LiveSimulation() {
             </div>
             {logs.map((log, i) => (
               <div key={i} style={{ 
-                color: log?.includes('CRITICAL') || log?.includes('ATTACK') ? 'var(--neon-red)' : 
-                       log?.includes('RECON') ? 'var(--neon-cyan)' : 
-                       log?.includes('EXPLOIT') ? 'var(--neon-purple)' : 'var(--text-main)',
+                color: log?.includes('RESULT') && log?.includes('Success') ? 'var(--neon-red)' : 
+                       log?.includes('RESULT') && log?.includes('Blocked') ? 'var(--neon-green)' : 
+                       log?.includes('ACT') ? 'var(--neon-cyan)' : 
+                       log?.includes('DECIDE') ? 'var(--neon-purple)' : 
+                       log?.includes('THINK') ? 'var(--text-muted)' : 'var(--text-main)',
                 marginBottom: '10px',
                 fontSize: '0.9rem',
                 lineHeight: '1.5'
