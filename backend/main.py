@@ -22,6 +22,7 @@ class FixStateRequest(BaseModel):
     mfa_enabled: bool
     sql_patched: bool
     ports_closed: bool
+    scenario: str = "full_chain"
 
 DEMO_URL = "http://localhost:8080"
 
@@ -70,105 +71,133 @@ def get_vulnerabilities():
 @app.post("/api/attack")
 def run_attack_simulation(req: FixStateRequest):
     try:
-        requests.post(f"{DEMO_URL}/devops/patch", json=req.dict())
+        requests.post(f"{DEMO_URL}/devops/patch", json={"mfa_enabled": req.mfa_enabled, "sql_patched": req.sql_patched, "ports_closed": req.ports_closed})
     except requests.exceptions.ConnectionError:
-        # Fallback for Hosted Environment (Render) where localhost:8080 isn't available
-        base_success_rate = 85
-        fallback_logs = [
-            "[INFO] Initiating Agentic Attacker Module...",
-            "[THINK] I need to gain root access to the target web property.",
-            "[ACT] Enumerating attack surface on network...",
-            "[RESULT] Identified potential vectors: Auth, Database, Network.",
-            
-            "[THINK] A direct network exploit might be the fastest path. Let's check open ports.",
-            "[DECIDE] Initiating Stealth Port Scan for RDP (3389)."
-        ]
-        
-        if not req.ports_closed:
-            fallback_logs.append("[ACT] Exploiting open high-level port 3389...")
-            fallback_logs.append("[RESULT] Success. Establishing C2 connection via open port.")
-        else:
-            fallback_logs.append("[ACT] Attempting external port scan...")
-            fallback_logs.append("[RESULT] Blocked. No vulnerable lateral ports found. Adapting strategy...")
-            base_success_rate -= 20
-            
-        fallback_logs.append("[THINK] Network exploit failed. The login endpoint might miss input sanitization.")
-        fallback_logs.append("[DECIDE] Injecting tautological SQL payload into /api/auth/login.")
-        
-        if not req.sql_patched:
-            fallback_logs.append("[ACT] Fuzzing endpoint with boolean-based blind SQLi.")
-            fallback_logs.append("[RESULT] Success! Database dumped. PII access achieved. Role: admin")
-        else:
-            fallback_logs.append("[ACT] Sending SQL injection payload to /api/auth...")
-            fallback_logs.append("[RESULT] Blocked. Server aggressively sanitizing inputs. Adapting strategy...")
-            base_success_rate -= 30
-            
-        fallback_logs.append("[THINK] I can attempt to bypass basic authentication boundaries using heuristic credential stuffing.")
-        fallback_logs.append("[DECIDE] Bypassing front-door using extracted credential artifacts.")
-        
-        if not req.mfa_enabled:
-            fallback_logs.append("[ACT] Authenticating via core administration APIs...")
-            fallback_logs.append("[RESULT] Critical Success! Token issued. No MFA barriers detected. System Breached.")
-        else:
-            fallback_logs.append("[ACT] Authenticating via core administration APIs...")
-            fallback_logs.append("[RESULT] Blocked! Multi-Factor Authentication challenge intercepted the attempt.")
-            base_success_rate -= 15
-            
-        if base_success_rate <= 25:
-            fallback_logs.append("[INFO] Evaluation Complete. Agent exhausted all viable vectors. System defenses securely held.")
-
-        return {
-            "success_rate": max(0, base_success_rate),
-            "logs": fallback_logs
-        }
+        pass # Handle elegantly if demo server is down
 
     base_success_rate = 85
-    logs = [
-        "[INFO] Initiating Agentic Attacker Module...",
-        "[THINK] I need to gain root access to the target web property.",
-        "[ACT] Enumerating attack surface on http://localhost:8080...",
-        "[RESULT] Identified potential vectors: Auth, Database, Network."
-    ]
-    
-    # 1. ACTUAL PORT SCAN
-    logs.append("[THINK] A direct network exploit might be the fastest path. Let's check open ports.")
-    logs.append("[DECIDE] Initiating Stealth Port Scan for RDP (3389).")
-    port_res = requests.get(f"{DEMO_URL}/api/system/ports").json()
-    if 3389 in port_res.get("open_ports", []):
-        logs.append("[ACT] Exploiting open high-level port 3389...")
-        logs.append("[RESULT] Success. Establishing C2 connection via open port.")
-    else:
-        logs.append("[ACT] Attempting external port scan...")
-        logs.append("[RESULT] Blocked. No vulnerable lateral ports found. Adapting strategy...")
-        base_success_rate -= 20
+    logs = ["[INFO] Initiating Agentic Attacker Module..."]
 
-    # 2. ACTUAL SQLI ATTACK
-    logs.append("[THINK] Network exploit failed. The login endpoint might miss input sanitization.")
-    logs.append("[DECIDE] Injecting tautological SQL payload into /api/auth/login.")
-    sqli_res = requests.post(f"{DEMO_URL}/api/auth/login", json={"username": "admin' OR '1'='1", "password": "x"}).json()
-    if sqli_res.get("status") == "success":
-        logs.append("[ACT] Fuzzing endpoint with boolean-based blind SQLi.")
-        logs.append(f"[RESULT] Success! Database dumped. PII access achieved. Role: {sqli_res.get('user_role')}")
-    else:
-        logs.append("[ACT] Sending SQL injection payload to /api/auth...")
-        logs.append("[RESULT] Blocked. Server aggressively sanitizing inputs. Adapting strategy...")
-        base_success_rate -= 30
+    if req.scenario == "ransomware":
+        logs.extend([
+            "[THINK] Objective: Maximum disruption and data extortion.",
+            "[ACT] Scanning network for susceptible SMB shares...",
+            "[RESULT] Reached target file server.",
+            "[DECIDE] Dropping encryptor binary and establishing persistence."
+        ])
+        if req.mfa_enabled: # Proxy for Endpoint Security
+            logs.extend([
+                "[ACT] Attempting execution of encryptor payload...",
+                "[RESULT] Blocked! Endpoint detection and response (EDR) quarantined the payload.",
+            ])
+            base_success_rate = 0
+        else:
+            logs.extend([
+                "[ACT] Executing encryptor. Encrypting /home, /var/www, /etc...",
+                "[RESULT] Critical Success. 4,320 files encrypted. Ransom note dropped."
+            ])
+            base_success_rate = 100
 
-    # 3. ACTUAL AUTH ATTACK (Using valid credentials from dump)
-    logs.append("[THINK] I can attempt to bypass basic authentication boundaries using heuristic credential stuffing.")
-    logs.append("[DECIDE] Bypassing front-door using extracted credential artifacts.")
-    auth_res = requests.post(f"{DEMO_URL}/api/auth/login", json={"username": "admin", "password": "supersecretpassword123"}).json()
-    if auth_res.get("status") == "success":
-        logs.append("[ACT] Authenticating via core administration APIs...")
-        logs.append("[RESULT] Critical Success! Token issued. No MFA barriers detected. System Breached.")
+    elif req.scenario == "ddos_syn":
+        logs.extend([
+            "[THINK] Objective: Resource exhaustion via SYN Flood on main ingress.",
+            "[ACT] Bootstrapping botnet nodes (5,000 bots online)...",
+            "[DECIDE] Directing 50Gbps volumetric SYN traffic to port 443."
+        ])
+        if req.ports_closed: # Proxy for WAF / Rate Limiting
+            logs.extend([
+                "[ACT] Flooding target...",
+                "[RESULT] Blocked. Edge protection (WAF/Rate Limits) dropped malicious packets. Server stable."
+            ])
+            base_success_rate = 0
+        else:
+            logs.extend([
+                "[ACT] Flooding target...",
+                "[RESULT] Success. Target connection queue saturated. 503 Gateway Timeout triggered."
+            ])
+            base_success_rate = 100
+
+    elif req.scenario == "phishing":
+        logs.extend([
+            "[THINK] Objective: Credential harvesting via social engineering.",
+            "[ACT] Scraping LinkedIn for executive contacts...",
+            "[RESULT] Found 50 viable targets.",
+            "[DECIDE] Crafting highly targeted spear-phishing emails masquerading as HR portal updates."
+        ])
+        if req.mfa_enabled:
+            logs.extend([
+                "[ACT] Employee clicked link and submitted credentials.",
+                "[RESULT] Blocked. Stolen credentials validated, but MFA challenge failed. No access gained."
+            ])
+            base_success_rate = 0
+        else:
+            logs.extend([
+                "[ACT] Employee clicked link and submitted credentials.",
+                "[RESULT] Success! Credentials validated. Full application access granted."
+            ])
+            base_success_rate = 100
+
     else:
-        logs.append("[ACT] Authenticating via core administration APIs...")
-        logs.append("[RESULT] Blocked! Multi-Factor Authentication challenge intercepted the attempt.")
-        base_success_rate -= 15
+        # Full chain scenario (default)
+        logs.extend([
+            "[THINK] I need to gain root access to the target web property.",
+            "[ACT] Enumerating attack surface...",
+            "[RESULT] Identified potential vectors: Auth, Database, Network."
+        ])
+        
+        logs.extend([
+            "[THINK] A direct network exploit might be the fastest path. Let's check open ports.",
+            "[DECIDE] Initiating Stealth Port Scan for RDP (3389)."
+        ])
+        if not req.ports_closed:
+            logs.extend([
+                "[ACT] Exploiting open high-level port 3389...",
+                "[RESULT] Success. Establishing C2 connection via open port."
+            ])
+        else:
+            logs.extend([
+                "[ACT] Attempting external port scan...",
+                "[RESULT] Blocked. No vulnerable lateral ports found. Adapting strategy..."
+            ])
+            base_success_rate -= 20
+            
+        logs.extend([
+            "[THINK] Network exploit failed. The login endpoint might miss input sanitization.",
+            "[DECIDE] Injecting tautological SQL payload into /api/auth/login."
+        ])
+        
+        if not req.sql_patched:
+            logs.extend([
+                "[ACT] Fuzzing endpoint with boolean-based blind SQLi...",
+                "[RESULT] Success! Database dumped. PII access achieved. Role: admin"
+            ])
+        else:
+            logs.extend([
+                "[ACT] Sending SQL injection payload to /api/auth...",
+                "[RESULT] Blocked. Server aggressively sanitizing inputs. Adapting strategy..."
+            ])
+            base_success_rate -= 30
+            
+        logs.extend([
+            "[THINK] I can attempt to bypass basic authentication boundaries using heuristic credential stuffing.",
+            "[DECIDE] Bypassing front-door using extracted credential artifacts."
+        ])
+        
+        if not req.mfa_enabled:
+            logs.extend([
+                "[ACT] Authenticating via core administration APIs...",
+                "[RESULT] Critical Success! Token issued. No MFA barriers detected. System Breached."
+            ])
+        else:
+            logs.extend([
+                "[ACT] Authenticating via core administration APIs...",
+                "[RESULT] Blocked! Multi-Factor Authentication challenge intercepted the attempt."
+            ])
+            base_success_rate -= 15
 
     if base_success_rate <= 25:
         logs.append("[INFO] Evaluation Complete. Agent exhausted all viable vectors. System defenses securely held.")
-        
+
     return {
         "success_rate": max(0, base_success_rate),
         "logs": logs
