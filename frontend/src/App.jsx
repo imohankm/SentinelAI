@@ -20,6 +20,8 @@ function App() {
           <Route path="/attack" element={<LiveSimulation />} />
           <Route path="/fix" element={<FixEngine />} />
           <Route path="/report" element={<FinalReport />} />
+          {/* Wildcard Redirect to prevent Empty Screens */}
+          <Route path="*" element={<DashboardSetup />} />
         </Routes>
       </main>
     </div>
