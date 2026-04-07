@@ -9,7 +9,7 @@ export default function DashboardSetup() {
   const handleInit = (e) => {
     e.preventDefault();
     localStorage.setItem('sentinel_target_ip', targetIp);
-    navigate('/scan');
+    navigate('/dashboard');
   };
 
   return (
